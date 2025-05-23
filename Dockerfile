@@ -49,10 +49,9 @@ RUN npm install && npm run build
 # Configure Nginx
 COPY docker/nginx/conf.d/app.conf /etc/nginx/conf.d/default.template
 RUN rm /etc/nginx/sites-enabled/default || true
-RUN sed -i 's/listen \${PORT:-80}/listen $PORT/g' /etc/nginx/sites-available/default
 
 # Create startup script
-RUN echo '#!/bin/bash\nenvsubst < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/default.conf\nnginx\nphp-fpm\ntail -f /dev/null' > /start.sh
+RUN echo '#!/bin/bash\nenvsubst < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/default.conf\nnginx\nphp artisan migrate --force\nphp-fpm\ntail -f /dev/null' > /start.sh
 RUN chmod +x /start.sh
 
 # Expose port
