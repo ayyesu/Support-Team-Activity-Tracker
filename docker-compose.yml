@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        image: ast-interview
+        container_name: ast-interview-app
+        restart: unless-stopped
+        working_dir: /var/www/html
+        volumes:
+            - ./:/var/www/html
+        networks:
+            - ast-network
+
+    nginx:
+        image: nginx:alpine
+        container_name: ast-interview-nginx
+        restart: unless-stopped
+        ports:
+            - "8000:80"
+        volumes:
+            - ./:/var/www/html
+            - ./docker/nginx/conf.d:/etc/nginx/conf.d
+        networks:
+            - ast-network
+
+    db:
+        image: mysql:8.0
+        container_name: ast-interview-db
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_USER: ${DB_USERNAME}
+            SERVICE_TAGS: dev
+            SERVICE_NAME: mysql
+        volumes:
+            - dbdata:/var/lib/mysql
+        networks:
+            - ast-network
+
+networks:
+    ast-network:
+        driver: bridge
+
+volumes:
+    dbdata:
+        driver: local
