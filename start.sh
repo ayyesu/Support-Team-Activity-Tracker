@@ -1,9 +1,19 @@
 #!/bin/bash
 export PORT=${PORT:-80}
 envsubst '$PORT' < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/default.conf
-# Start Nginx and PHP-FPM
+
+# Clear configuration cache
+php artisan config:clear
+php artisan cache:clear
+
+# Start Nginx
 nginx
-php artisan config:cache
+
+# Run migrations with fresh state
 php artisan migrate:fresh --force --seed
+
+# Start PHP-FPM
 php-fpm
+
+# Keep container running
 tail -f /dev/null
