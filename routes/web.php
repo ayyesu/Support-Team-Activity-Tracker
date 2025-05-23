@@ -8,9 +8,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Health check route for Railway
+// Health check route
 Route::get('/health', function () {
-    return response()->json(['status' => 'ok']);
+    return response('OK', 200);
 });
 
 Route::get('/', function () {

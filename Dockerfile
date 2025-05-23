@@ -21,7 +21,8 @@ RUN apt-get update && apt-get install -y \
     nodejs \
     npm \
     libpq-dev \
-    nginx
+    nginx \
+    gettext-base
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -46,11 +47,12 @@ RUN composer install --no-interaction --no-dev --optimize-autoloader
 RUN npm install && npm run build
 
 # Configure Nginx
-COPY docker/nginx/conf.d/app.conf /etc/nginx/sites-available/default
+COPY docker/nginx/conf.d/app.conf /etc/nginx/conf.d/default.template
+RUN rm /etc/nginx/sites-enabled/default || true
 RUN sed -i 's/listen \${PORT:-80}/listen $PORT/g' /etc/nginx/sites-available/default
 
 # Create startup script
-RUN echo '#!/bin/bash\nnginx\nphp-fpm\n' > /start.sh
+RUN echo '#!/bin/bash\nenvsubst < /etc/nginx/conf.d/default.template > /etc/nginx/conf.d/default.conf\nnginx\nphp-fpm\ntail -f /dev/null' > /start.sh
 RUN chmod +x /start.sh
 
 # Expose port
